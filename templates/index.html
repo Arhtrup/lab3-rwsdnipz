@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Rotator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Upload Image to Rotate</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required><br><br>
+        
+        <label>Rotation Angle (degrees):</label>
+        <input type="number" name="angle" value="45" min="0" max="360"><br><br>
+        
+        <h3>Individual Color Channel Rotation (Optional)</h3>
+        <label>Red Channel Angle (degrees):</label>
+        <input type="number" name="red_angle" value="0" min="-360" max="360"><br>
+        
+        <label>Green Channel Angle (degrees):</label>
+        <input type="number" name="green_angle" value="0" min="-360" max="360"><br>
+        
+        <label>Blue Channel Angle (degrees):</label>
+        <input type="number" name="blue_angle" value="0" min="-360" max="360"><br><br>
+        
+        <button type="submit">Upload and Rotate</button>
+    </form>
+</body>
+</html>
