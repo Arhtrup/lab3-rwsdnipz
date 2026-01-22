@@ -105,6 +105,18 @@ def upload():
         rotated_img.save(rotated_path)
 
         # Создаем гистограммы
+        orig_hist = create_color_histogram(Image.open(upload_path))
+        rotated_hist = create_color_histogram(rotated_img)
+
+        return render_template('result.html',
+                               original=upload_path,
+                               rotated=rotated_path,
+                               angle=angle,
+                               red_angle=red_angle,
+                               green_angle=green_angle,
+                               blue_angle=blue_angle,
+                               orig_hist=orig_hist,
+                               rotated_hist=rotated_hist)
     return 'Invalid file type'
 
 if __name__ == '__main__':
