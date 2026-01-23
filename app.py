@@ -41,21 +41,51 @@ def rotate_image(image_path, angle, red_angle=0, green_angle=0, blue_angle=0):
                 r, g, b = img.split()
                 a = None
             
-            # Rotate each channel individually
-            if red_angle != 0:
-                r = r.rotate(red_angle, expand=True, resample=Image.BICUBIC)
-            if green_angle != 0:
-                g = g.rotate(green_angle, expand=True, resample=Image.BICUBIC)
-            if blue_angle != 0:
-                b = b.rotate(blue_angle, expand=True, resample=Image.BICUBIC)
+            # Function to rotate a channel and return it with its size
+            def rotate_channel(channel, channel_angle):
+                if channel_angle != 0:
+                    rotated = channel.rotate(channel_angle, expand=True, resample=Image.BICUBIC)
+                    return rotated, rotated.size
+                else:
+                    return channel, channel.size
+            
+            # Rotate each channel
+            r_rotated, r_size = rotate_channel(r, red_angle)
+            g_rotated, g_size = rotate_channel(g, green_angle)
+            b_rotated, b_size = rotate_channel(b, blue_angle)
+            
             if a is not None:
-                a = a.rotate(angle, expand=True, resample=Image.BICUBIC)
+                a_rotated, a_size = rotate_channel(a, angle)
+            
+            # Find maximum dimensions among all rotated channels
+            max_width = max(r_size[0], g_size[0], b_size[0], a_size[0] if a is not None else 0)
+            max_height = max(r_size[1], g_size[1], b_size[1], a_size[1] if a is not None else 0)
+            
+            # Function to resize channel to max dimensions (center the image)
+            def resize_to_max(channel, original_size):
+                if original_size == (max_width, max_height):
+                    return channel
+                
+                # Create new image with max dimensions (black background)
+                new_channel = Image.new('L', (max_width, max_height), 0)
+                x_offset = (max_width - original_size[0]) // 2
+                y_offset = (max_height - original_size[1]) // 2
+                new_channel.paste(channel, (x_offset, y_offset))
+                return new_channel
+            
+            # Resize all channels to max dimensions
+            r_resized = resize_to_max(r_rotated, r_size)
+            g_resized = resize_to_max(g_rotated, g_size)
+            b_resized = resize_to_max(b_rotated, b_size)
+            
+            if a is not None:
+                a_resized = resize_to_max(a_rotated, a_size)
             
             # Merge channels back
             if a is not None:
-                rotated = Image.merge('RGBA', (r, g, b, a))
+                rotated = Image.merge('RGBA', (r_resized, g_resized, b_resized, a_resized))
             else:
-                rotated = Image.merge('RGB', (r, g, b))
+                rotated = Image.merge('RGB', (r_resized, g_resized, b_resized))
             
             # Apply overall rotation if any channel was rotated and angle is different
             if angle != 0 and (red_angle != angle or green_angle != angle or blue_angle != angle):
